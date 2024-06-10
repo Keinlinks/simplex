@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+    />
+    <link href="./styles.css" rel="stylesheet" />
+    <title>Simplex Fase 2</title>
+  </head>
+  <body>
+    <div class="top">
+      <h1>Simplex Fase 2</h1>
+      <div class="main">
+        <p >Z: </p>
+        <div id="z_container">
+
+        </div>
+       
+            <div>
+              <p>Sujeto a: </p>
+              <button id="add_subject" style="margin-bottom: 8px;">Agregar</button>
+              <button id="remove_subject" style="margin-bottom: 8px;">Eliminar</button>
+              <button id="calc">Calcular</button>
+            </div>
+            <div id="subject_container">
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">
+      <p>Resultado: </p>
+      <div id="result_container" class="result_container">
+
+      </div>
+    </div>
+    <script src="./renderer.js"></script>
+    <script src="./simplex.js"></script>
+    <script src="./index.js"></script>
+  </body>
+</html>
+
