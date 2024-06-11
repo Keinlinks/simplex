@@ -10,7 +10,17 @@
     <title>Simplex Fase 2</title>
   </head>
   <body>
-    <div class="top">
+    <div class="select">
+      <select id="select">
+        <option value="maximizar">Maximizar</option>
+        <option value="minimizar">Minimizar</option>
+      </select>
+      <input type="number" id="variables" value="4" />
+      <button id="buttonInit">Aceptar</button>
+    </div>
+   
+      
+    <div id="main_container" style="display: none;" class="top">
       <h1>Simplex Fase 2</h1>
       <div class="main">
         <p >Z: </p>
@@ -22,7 +32,9 @@
               <p>Sujeto a: </p>
               <button id="add_subject" style="margin-bottom: 8px;">Agregar</button>
               <button id="remove_subject" style="margin-bottom: 8px;">Eliminar</button>
-              <button id="calc">Calcular</button>
+              <button id="calc" style="margin-bottom: 8px;">Calcular</button>
+               <button style="display: none;" id="clean" style="margin-bottom: 8px;">Limpiar</button>
+              
             </div>
             <div id="subject_container">
             </div>
@@ -30,14 +42,14 @@
       </div>
     </div>
     <div class="bottom">
-      <p>Resultado: </p>
+      <p class="result" style="font-weight: 800;" id="result_label"></p>
       <div id="result_container" class="result_container">
 
       </div>
     </div>
     <script src="./renderer.js"></script>
+    <script src="./gpp.js"></script>
     <script src="./simplex.js"></script>
     <script src="./index.js"></script>
   </body>
 </html>
-

@@ -14,11 +14,8 @@ class Simplex {
     this.z = z;
   }
   setSubjectTo(subjectTo) {
-    console.log(subjectTo);
     this.subjectTo = subjectTo;
   }
-
-  updateDict(z, subjectTo) {}
 
   checkMoreNegativeZ(z) {
     let column = 0;
@@ -30,6 +27,18 @@ class Simplex {
       }
     });
     if (min < 0) return column;
+    else return null;
+  }
+  checkMorePositiveZ(z) {
+    let column = 0;
+    let max = 0;
+    z.forEach((zF, index) => {
+      if (zF > max) {
+        max = zF;
+        column = index;
+      }
+    });
+    if (max > 0) return column;
     else return null;
   }
 
@@ -80,10 +89,10 @@ class Simplex {
       let last = subject.slice(-2);
       for (let i = 0; i < countSubject; i++) {
         if (i + 1 == row) {
-          rest.push(last[1]);
+          rest.push(last[0]);
         } else rest.push(0);
       }
-      this.current_dict[row] = [...rest, last[0]];
+      this.current_dict[row] = [...rest, last[1]];
       this.current_dict[row] = [0, ...this.current_dict[row]];
       row++;
     });
@@ -115,12 +124,18 @@ class Simplex {
     });
   }
 
-  main() {
+  main(mode) {
     this.initDict(this.z, this.subjectTo);
     let tries = 0;
+    let status = "ok";
     while (true) {
       if (tries > this.limit_tries) break;
-      let column = this.checkMoreNegativeZ(this.current_dict[0]);
+      let column;
+      if (mode === "maximizar") {
+        column = this.checkMoreNegativeZ(this.current_dict[0]);
+      } else if (mode === "minimizar") {
+        column = this.checkMorePositiveZ(this.current_dict[0]);
+      }
       if (column === null) {
         console.log("No mas negativos en Z");
         break;
@@ -128,6 +143,7 @@ class Simplex {
       let pivot = this.checkOutVariable(column, this.current_dict);
       if (pivot === null) {
         console.log("No mas variables en subjectTo");
+        status = "No acotada";
         break;
       }
       this.basics[pivot - 1] = `X_${column}`;
@@ -139,6 +155,7 @@ class Simplex {
     return {
       basics: this.basics,
       current_dict: this.current_dict,
+      status: status,
     };
   }
 }

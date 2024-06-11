@@ -1,10 +1,10 @@
-const simplex = new Simplex();
-
 let variables = 4;
 var form = {
   z: [],
   subjectTo: [],
 };
+
+let inputs = [];
 
 const createFormLine = (values = [0, 0, 0, 0, 0]) => {
   let numInputs = values.length - 1;
@@ -12,8 +12,9 @@ const createFormLine = (values = [0, 0, 0, 0, 0]) => {
   let row = form.subjectTo.length;
   const formLine = document.createElement("div");
   formLine.classList.add("form-line");
+  let inputs_array = [];
   //Xi
-  for (let i = 1; i <= numInputs; i++) {
+  for (let i = 1; i <= numInputs + 1; i++) {
     const cellContainer = document.createElement("div");
     cellContainer.classList.add("cell_container");
 
@@ -27,6 +28,7 @@ const createFormLine = (values = [0, 0, 0, 0, 0]) => {
       x = `x${i}`;
       form.subjectTo[row].x[i - 1] = +value;
     });
+    inputs_array.push(input);
 
     const paragraph = document.createElement("p");
 
@@ -44,6 +46,8 @@ const createFormLine = (values = [0, 0, 0, 0, 0]) => {
     formLine.appendChild(cellContainer);
   }
 
+  const numberOfInputs = inputs.length;
+
   //x clearance
   let cellContainer = document.createElement("div");
   cellContainer.classList.add("cell_container");
@@ -57,6 +61,7 @@ const createFormLine = (values = [0, 0, 0, 0, 0]) => {
     const value = e.target.value;
     form.subjectTo[row].x[numInputs + 1] = +value;
   });
+  inputs_array.push(input);
 
   let paragraph = document.createElement("p");
 
@@ -86,6 +91,7 @@ const createFormLine = (values = [0, 0, 0, 0, 0]) => {
     const value = e.target.value;
     form.subjectTo[row].x[numInputs] = +value;
   });
+  inputs_array.push(input);
 
   paragraph = document.createElement("p");
 
@@ -99,7 +105,7 @@ const createFormLine = (values = [0, 0, 0, 0, 0]) => {
   cellContainer.appendChild(input);
   formLine.appendChild(cellContainer);
   subject_container.appendChild(formLine);
-
+  inputs.push(inputs_array);
   form.subjectTo.push({
     x: [...values, 1],
     element: formLine,
@@ -111,13 +117,19 @@ const subject_container = document.getElementById("subject_container");
 
 const addSubjectButton = document.getElementById("add_subject");
 addSubjectButton.addEventListener("click", () => {
-  createFormLine([0, 0, 0, 0]);
+  const variables = +document.getElementById("variables").value;
+  let values = [];
+  for (let i = 0; i < variables; i++) {
+    values.push(0);
+  }
+  createFormLine(values);
 });
 
 const removeSubjectButton = document.getElementById("remove_subject");
 removeSubjectButton.addEventListener("click", () => {
   if (form.subjectTo.length === 0) return;
   form.subjectTo.pop();
+  inputs.pop();
   const lastChild = subject_container.lastChild;
   subject_container.removeChild(lastChild);
 });
@@ -127,45 +139,74 @@ var $result_ = document.getElementById("result_container");
 calcButton.addEventListener("click", () => {
   if ($result_) $result_.innerHTML = "";
   getZ();
+
+  const simplex = new Simplex();
   simplex.setZ(form.z);
-  simplex.setSubjectTo(form.subjectTo.map((subject) => subject.x));
-  const result = simplex.main();
+  simplex.setSubjectTo(getSubjectsInputs());
+  console.log(getSubjectsInputs());
+  const mode = document.getElementById("select").value;
+  const result = simplex.main(mode);
   const resultContainer = document.getElementById("result_container");
-  const dataTable = result.current_dict.map((row, index) => {
+  let dataTable;
+  dataTable = result.current_dict.map((row, index) => {
     if (index === 0) return ["Z", ...row];
     if (result.basics[index - 1] === undefined) return row;
     return [result.basics[index - 1], ...row];
   });
+  let table_header = ["-", "Z"];
+  for (let i = 0; i < result.current_dict[1].length - 2; i++) {
+    table_header.push(`X_${i + 1}`);
+  }
+  table_header.push("R");
+
+  dataTable = [table_header].concat(dataTable);
   const table = createTable(dataTable);
   resultContainer.appendChild(table);
+  const resultLabel = document.getElementById("result_label");
+  resultLabel.textContent = `Resultado: ${result.status}`;
+});
+
+const cleanButton = document.getElementById("clean");
+cleanButton.addEventListener("click", () => {
+  $result_.innerHTML = "";
 });
 
 function getZ() {
-  z_x1 = document.getElementById("z_x1").value;
-  z_x2 = document.getElementById("z_x2").value;
-  z_x3 = document.getElementById("z_x3").value;
-  z_x4 = document.getElementById("z_x4").value;
-  z_c = document.getElementById("z_c").value;
-  form.z = [+z_x1, +z_x2, +z_x3, +z_x4, +z_c];
-}
-const z_form = createZForm([0, 0, 0, 0, 0]);
-createFormLine([0, 0, 0, 0]);
+  const variables = +document.getElementById("variables").value;
+  let values = [];
+  for (let i = 0; i < variables; i++) {
+    let key = `z_x${i + 1}`;
+    values.push(+document.getElementById(key).value);
+  }
 
-const z_container = document.getElementById("z_container");
-z_container.appendChild(z_form);
+  form.z = values;
+}
+
+function getSubjectsInputs() {
+  subjectTo = [];
+  inputs.forEach((input) => {
+    let values = [];
+    input.forEach((input) => {
+      values.push(+input.value);
+    });
+    subjectTo.push(values);
+  });
+  return subjectTo;
+}
 
 function createZForm(values = [0, 0, 0, 0, 0, 0]) {
   let z_main = document.createElement("div");
   z_main.className = "form-line z_line";
 
-  let data = [
-    { id: "z_x1", value: values[0], label: "X", subtitle: "1" },
-    { id: "z_x2", value: values[1], label: "X", subtitle: "2" },
-    { id: "z_x3", value: values[2], label: "X", subtitle: "3" },
-    { id: "z_x4", value: values[3], label: "X", subtitle: "4" },
-    { id: "z_c", value: values[4], label: "C", subtitle: "" },
-  ];
-
+  let data = [];
+  values.forEach((value, index) => {
+    data.push({
+      id: `z_x${index + 1}`,
+      value: value,
+      label: "X",
+      subtitle: index + 1,
+    });
+  });
   data.forEach((item) => {
     let cellContainer = document.createElement("div");
     cellContainer.className = "cell_container";
@@ -197,6 +238,7 @@ function createTable(data) {
   const table = document.createElement("table");
   table.border = 1;
   data.forEach((rowData) => {
+    console.log(rowData);
     const tr = document.createElement("tr");
 
     rowData.forEach((cellData) => {
@@ -210,3 +252,17 @@ function createTable(data) {
 
   return table;
 }
+
+const buttonInit = document.getElementById("buttonInit");
+buttonInit.addEventListener("click", () => {
+  document.getElementById("main_container").style.display = "block";
+  const variables = +document.getElementById("variables").value;
+  let values = [];
+  for (let i = 0; i < variables; i++) {
+    values.push(0);
+  }
+  const z_form = createZForm(values);
+  createFormLine(values);
+  const z_container = document.getElementById("z_container");
+  z_container.appendChild(z_form);
+});

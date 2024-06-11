@@ -14,6 +14,14 @@ h3,
 h4 {
   text-align: center;
 }
+.select {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+}
 
 .z_line {
   border-bottom: 2px solid black;
@@ -76,4 +84,8 @@ td {
 th {
   background-color: #f2f2f2;
   font-weight: bold;
+}
+
+.result {
+  text-align: center;
 }
